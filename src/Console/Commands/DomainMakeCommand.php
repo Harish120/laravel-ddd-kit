@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace Harryes\LaravelDddKit\Console\Commands;
 
 use Harryes\LaravelDddKit\Console\Concerns\ManagesStubs;
+use Harryes\LaravelDddKit\Support\AutoloadDumper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+
+use function Laravel\Prompts\multiselect;
+use function Laravel\Prompts\text;
 
 final class DomainMakeCommand extends Command
 {
     use ManagesStubs;
 
-    protected $signature = 'ddd:domain {name : The domain name, e.g. Contact}';
+    protected $signature = 'ddd:domain
+        {name : The domain name, e.g. Contact}
+        {--interactive : Interactively choose building blocks to generate after scaffolding}';
 
     protected $description = 'Scaffold a full DDD module (Domain, Application, and Infrastructure layers) for a domain';
 
@@ -35,7 +41,7 @@ final class DomainMakeCommand extends Command
         'database/migrations',
     ];
 
-    public function handle(): int
+    public function handle(AutoloadDumper $autoloadDumper): int
     {
         $domain = Str::studly((string) $this->argument('name'));
         $path = rtrim((string) config('ddd.base_path'), '/').'/'.$domain;
@@ -74,7 +80,49 @@ final class DomainMakeCommand extends Command
             $this->registerServiceProvider($namespace, $domain);
         }
 
+        if ((bool) $this->option('interactive')) {
+            $this->runInteractiveMode($domain);
+        }
+
+        if ((bool) config('ddd.auto_dump_autoload')) {
+            $autoloadDumper->dump(base_path());
+        }
+
         return self::SUCCESS;
+    }
+
+    private function runInteractiveMode(string $domain): void
+    {
+        $blocks = multiselect(
+            label: "Which building blocks would you like to generate for {$domain}?",
+            options: [
+                'entity' => 'Aggregate root (ddd:entity --aggregate)',
+                'value-object' => 'Value object (ddd:value-object)',
+                'usecase' => 'Use case (ddd:usecase)',
+                'repository' => 'Repository (ddd:repository)',
+            ],
+            hint: 'Use the space bar to select options.',
+        );
+
+        if (in_array('entity', $blocks, true)) {
+            $name = text(label: "Aggregate root name for {$domain}", placeholder: 'Lead', required: true);
+            $this->call('ddd:entity', ['name' => "{$domain}/{$name}", '--aggregate' => true]);
+        }
+
+        if (in_array('value-object', $blocks, true)) {
+            $name = text(label: "Value object name for {$domain}", placeholder: 'Email', required: true);
+            $this->call('ddd:value-object', ['name' => "{$domain}/{$name}"]);
+        }
+
+        if (in_array('usecase', $blocks, true)) {
+            $name = text(label: "Use case name for {$domain}", placeholder: 'CreateLead', required: true);
+            $this->call('ddd:usecase', ['name' => "{$domain}/{$name}"]);
+        }
+
+        if (in_array('repository', $blocks, true)) {
+            $name = text(label: 'Target aggregate name for the repository', placeholder: 'Lead', required: true);
+            $this->call('ddd:repository', ['name' => "{$domain}/{$name}"]);
+        }
     }
 
     private function registerServiceProvider(string $namespace, string $domain): void
