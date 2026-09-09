@@ -218,6 +218,43 @@ final readonly class CreateLeadData
 }
 ```
 
+### Companion Pest tests
+
+`ddd:entity`, `ddd:value-object`, and `ddd:usecase` each also generate a
+matching Pest test under `tests/Unit/Domains/...`, mirroring the source path.
+These are plain unit tests with no framework bootstrap — no `uses(TestCase::class)`.
+
+```
+   INFO  Generated Lead aggregate root at app/Domains/Contact/Domain/Entities/Lead.php.
+
+   INFO  Generated test at tests/Unit/Domains/Contact/Domain/Entities/LeadTest.php.
+```
+
+```php
+use App\Domains\Contact\Domain\Entities\Lead;
+
+it('creates a new Lead and exposes its id', function (): void {
+    $aggregate = Lead::create('1');
+
+    expect($aggregate->id())->toBe('1');
+});
+
+it('reconstitutes a Lead from persisted state without recording new events', function (): void {
+    $aggregate = Lead::reconstitute('1');
+
+    expect($aggregate->pullDomainEvents())->toBe([]);
+});
+```
+
+Use case tests are different: since a use case's dependencies are unknown at
+generation time (no repository has necessarily been wired into its
+constructor yet), the companion test is generated as a `->todo()` with
+instructions to replace it with an in-memory fake of the repository
+interface(s) you inject — a real assertion isn't possible until then.
+
+Disable this entirely with `ddd.generate_tests => false`, or redirect the
+output location with `ddd.tests_path`.
+
 ### `ddd:repository`
 
 Generates a repository interface (`Domain/Repositories/`), a minimal Eloquent
@@ -402,6 +439,8 @@ It checks:
 | `auto_register_providers` | `true` | Append generated `{Domain}ServiceProvider` classes to `bootstrap/providers.php`. |
 | `providers_file` | `null` | Override the target `bootstrap/providers.php` path (non-standard app structures). |
 | `auto_dump_autoload` | `true` | Refresh the Composer autoloader after `ddd:domain` scaffolds a module. |
+| `generate_tests` | `true` | Generate a companion Pest test alongside `ddd:entity`, `ddd:value-object`, and `ddd:usecase` stubs. |
+| `tests_path` | `null` | Override the root for generated companion tests. Null uses `base_path('tests')`. |
 
 ## Testing
 

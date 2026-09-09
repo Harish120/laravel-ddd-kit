@@ -39,3 +39,11 @@ This completes the full command set from the original build order (§5).
 - `ddd:domain` now refreshes the Composer autoloader after scaffolding
   (`ddd.auto_dump_autoload`, default `true`), for apps using an
   optimized/classmap autoloader.
+- `ddd:entity`, `ddd:value-object`, and `ddd:usecase` now each generate a
+  matching Pest test under `tests/Unit/Domains/...` (`ddd.generate_tests`,
+  default `true`; path configurable via `ddd.tests_path`). Entity/VO tests
+  are plain unit tests with no framework bootstrap; use case tests are
+  generated as a `->todo()` pending an in-memory fake repository, since the
+  use case's real dependencies aren't known at generation time.
+
+This completes all of §7's differentiators.
