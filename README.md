@@ -197,6 +197,62 @@ final readonly class CreateLeadData
 }
 ```
 
+### `ddd:repository`
+
+Generates a repository interface (`Domain/Repositories/`), a minimal Eloquent
+model (`Infrastructure/Persistence/Eloquent/`), and the Eloquent
+implementation (`Infrastructure/Persistence/Repositories/`) for an existing
+aggregate — then binds the interface to the implementation in the domain's
+`ServiceProvider` automatically. Requires the aggregate to already exist
+(`ddd:entity {domain}/{name} --aggregate`); warns (without failing) if the
+target entity doesn't extend `AggregateRoot`, since repositories should only
+expose aggregate roots.
+
+```bash
+php artisan ddd:repository Contact/Lead
+```
+
+```
+   INFO  Generated LeadRepository interface at app/Domains/Contact/Domain/Repositories/LeadRepository.php.
+
+   INFO  Generated LeadModel at app/Domains/Contact/Infrastructure/Persistence/Eloquent/LeadModel.php.
+
+   INFO  Generated EloquentLeadRepository at app/Domains/Contact/Infrastructure/Persistence/Repositories/EloquentLeadRepository.php.
+
+   INFO  Bound App\Domains\Contact\Domain\Repositories\LeadRepository to App\Domains\Contact\Infrastructure\Persistence\Repositories\EloquentLeadRepository in ContactServiceProvider.
+```
+
+```php
+interface LeadRepository
+{
+    public function find(string $id): ?Lead;
+
+    public function save(Lead $lead): void;
+}
+```
+
+```php
+final class EloquentLeadRepository implements LeadRepository
+{
+    public function find(string $id): ?Lead
+    {
+        $model = LeadModel::find($id);
+
+        if ($model === null) {
+            return null;
+        }
+
+        // TODO: map $model's attributes onto Lead::reconstitute(...).
+        return Lead::reconstitute($model->getKey());
+    }
+
+    public function save(Lead $lead): void
+    {
+        // TODO: map $lead's state onto a LeadModel and persist it.
+    }
+}
+```
+
 ## Configuration
 
 | Key | Default | Description |

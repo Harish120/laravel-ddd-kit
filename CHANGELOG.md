@@ -17,3 +17,6 @@ All notable changes to this project will be documented in this file.
   equality-by-value object with a validation TODO block.
 - `ddd:usecase {domain}/{name}` command — generates a use case and matching
   DTO, wired for `DB::transaction` and post-transaction event dispatch.
+- `ddd:repository {domain}/{name}` command — generates a repository interface,
+  a minimal Eloquent model, and an Eloquent repository implementation for an
+  existing aggregate, and auto-binds them in the domain's service provider.
