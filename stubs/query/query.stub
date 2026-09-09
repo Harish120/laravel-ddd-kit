@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Illuminate\Support\Facades\DB;
+
+final readonly class {{ class }}
+{
+    public function handle(): mixed
+    {
+        // TODO: query read models directly here — bypassing the domain layer
+        // is fine for reads, but never write through this class. Writes
+        // still go through a use case and its aggregate.
+        return DB::table('table_name')->get();
+    }
+}

@@ -8,6 +8,7 @@ use Harryes\LaravelDddKit\Console\Commands\DomainMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\EntityMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\EventMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\ListenerMakeCommand;
+use Harryes\LaravelDddKit\Console\Commands\QueryMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\RepositoryMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\UseCaseMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\ValueObjectMakeCommand;
@@ -42,6 +43,7 @@ final class DddKitServiceProvider extends ServiceProvider
             RepositoryMakeCommand::class,
             EventMakeCommand::class,
             ListenerMakeCommand::class,
+            QueryMakeCommand::class,
         ]);
     }
 }
