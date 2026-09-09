@@ -59,6 +59,27 @@ When `ddd.auto_register_providers` is enabled (the default), the generated
 If that file doesn't exist, the command fails with a clear error instead of
 registering nothing silently.
 
+When `ddd.auto_dump_autoload` is enabled (the default), the command also
+refreshes Composer's autoloader afterward. This only matters if your app uses
+an optimized/classmap autoloader — plain PSR-4 autoloading already finds new
+files without it — and it silently does nothing if there's no `composer.json`
+or no `composer` binary on the `PATH`.
+
+#### Interactive mode
+
+Pass `--interactive` to immediately generate a first building block after the
+module scaffold, without leaving the terminal:
+
+```bash
+php artisan ddd:domain Contact --interactive
+```
+
+You'll be asked which building blocks to add (aggregate root, value object,
+use case, repository — multiple selection allowed) and then for each one's
+name, exactly as if you'd run `ddd:entity --aggregate`, `ddd:value-object`,
+`ddd:usecase`, and `ddd:repository` yourself afterward. Selecting nothing
+just leaves you with the plain module scaffold.
+
 ### `ddd:entity`
 
 Generates an entity — or, with `--aggregate`, an aggregate root extending the
@@ -380,6 +401,7 @@ It checks:
 | `stubs_path` | `null` | Override with a published stub path to customize generated file templates. |
 | `auto_register_providers` | `true` | Append generated `{Domain}ServiceProvider` classes to `bootstrap/providers.php`. |
 | `providers_file` | `null` | Override the target `bootstrap/providers.php` path (non-standard app structures). |
+| `auto_dump_autoload` | `true` | Refresh the Composer autoloader after `ddd:domain` scaffolds a module. |
 
 ## Testing
 

@@ -32,3 +32,10 @@ All notable changes to this project will be documented in this file.
   non-zero on violations, suitable as a CI gate.
 
 This completes the full command set from the original build order (§5).
+
+- `ddd:domain --interactive` — after scaffolding, interactively choose which
+  building blocks (aggregate root, value object, use case, repository) to
+  generate next, powered by `laravel/prompts`.
+- `ddd:domain` now refreshes the Composer autoloader after scaffolding
+  (`ddd.auto_dump_autoload`, default `true`), for apps using an
+  optimized/classmap autoloader.
