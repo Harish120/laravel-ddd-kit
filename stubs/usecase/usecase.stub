@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use {{ dto_namespace }}\{{ class }}Data;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+
+final class {{ class }}
+{
+    public function __construct(
+        // TODO: inject the domain repository interface(s) this use case needs.
+    ) {}
+
+    public function handle({{ class }}Data $data): void
+    {
+        DB::transaction(function () use ($data): void {
+            // TODO: load or create the aggregate and invoke its intent method(s).
+            // TODO: persist the aggregate via its repository interface.
+
+            // Dispatch events recorded on the aggregate — never from the Domain layer.
+            // foreach ($aggregate->pullDomainEvents() as $event) {
+            //     Event::dispatch($event);
+            // }
+        });
+    }
+}

@@ -1,0 +1,12 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ dto_namespace }};
+
+final readonly class {{ class }}Data
+{
+    public function __construct(
+        // TODO: add the primitive/value-object properties this use case needs.
+    ) {}
+}
