@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Harryes\LaravelDddKit\Support\AutoloadDumper;
 use Illuminate\Support\Facades\File;
 
 beforeEach(function (): void {
@@ -105,4 +106,80 @@ it('refuses to overwrite an existing domain', function (): void {
     $this->artisan('ddd:domain', ['name' => 'Contact'])
         ->assertFailed()
         ->expectsOutputToContain('already exists');
+});
+
+it('does nothing extra with --interactive when no blocks are selected', function (): void {
+    $this->artisan('ddd:domain', ['name' => 'Contact', '--interactive' => true])
+        ->expectsChoice(
+            'Which building blocks would you like to generate for Contact?',
+            [],
+            [
+                'entity' => 'Aggregate root (ddd:entity --aggregate)',
+                'value-object' => 'Value object (ddd:value-object)',
+                'usecase' => 'Use case (ddd:usecase)',
+                'repository' => 'Repository (ddd:repository)',
+            ]
+        )
+        ->assertSuccessful();
+
+    expect(File::isDirectory("{$this->domainsPath}/Contact/Domain/Entities"))->toBeTrue()
+        ->and(File::exists("{$this->domainsPath}/Contact/Domain/Entities/Lead.php"))->toBeFalse();
+});
+
+it('generates an aggregate root interactively when selected', function (): void {
+    $this->artisan('ddd:domain', ['name' => 'Contact', '--interactive' => true])
+        ->expectsChoice(
+            'Which building blocks would you like to generate for Contact?',
+            ['entity'],
+            [
+                'entity' => 'Aggregate root (ddd:entity --aggregate)',
+                'value-object' => 'Value object (ddd:value-object)',
+                'usecase' => 'Use case (ddd:usecase)',
+                'repository' => 'Repository (ddd:repository)',
+            ]
+        )
+        ->expectsQuestion('Aggregate root name for Contact', 'Lead')
+        ->assertSuccessful();
+
+    expect(File::exists("{$this->domainsPath}/Contact/Domain/Entities/Lead.php"))->toBeTrue();
+});
+
+it('dumps the composer autoloader after scaffolding when enabled', function (): void {
+    $dumper = new class implements AutoloadDumper
+    {
+        /** @var list<string> */
+        public array $calls = [];
+
+        public function dump(string $workingDirectory): void
+        {
+            $this->calls[] = $workingDirectory;
+        }
+    };
+
+    $this->app->instance(AutoloadDumper::class, $dumper);
+
+    $this->artisan('ddd:domain', ['name' => 'Contact'])->assertSuccessful();
+
+    expect($dumper->calls)->toHaveCount(1);
+});
+
+it('does not dump the composer autoloader when disabled', function (): void {
+    config()->set('ddd.auto_dump_autoload', false);
+
+    $dumper = new class implements AutoloadDumper
+    {
+        /** @var list<string> */
+        public array $calls = [];
+
+        public function dump(string $workingDirectory): void
+        {
+            $this->calls[] = $workingDirectory;
+        }
+    };
+
+    $this->app->instance(AutoloadDumper::class, $dumper);
+
+    $this->artisan('ddd:domain', ['name' => 'Contact'])->assertSuccessful();
+
+    expect($dumper->calls)->toBe([]);
 });
