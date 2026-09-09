@@ -20,3 +20,7 @@ All notable changes to this project will be documented in this file.
 - `ddd:repository {domain}/{name}` command — generates a repository interface,
   a minimal Eloquent model, and an Eloquent repository implementation for an
   existing aggregate, and auto-binds them in the domain's service provider.
+- `ddd:event {domain}/{name}` command — generates a plain PHP domain event.
+- `ddd:listener {domain}/{name} [--event=domain/event]` command — generates a
+  listener in `Application/Listeners/`, optionally wired to a specific
+  (possibly cross-domain) event.

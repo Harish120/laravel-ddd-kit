@@ -253,6 +253,59 @@ final class EloquentLeadRepository implements LeadRepository
 }
 ```
 
+### `ddd:event` and `ddd:listener`
+
+`ddd:event` generates a plain PHP domain event (`Domain/Events/`) — no
+Laravel dependency, no framework event base class.
+
+```bash
+php artisan ddd:event Contact/LeadWasCreated
+```
+
+```php
+final readonly class LeadWasCreated
+{
+    public function __construct(
+        public string $aggregateId,
+        public DateTimeImmutable $occurredAt = new DateTimeImmutable(),
+        // TODO: add any other data this event's listeners need.
+    ) {}
+}
+```
+
+`ddd:listener` generates a listener in the target domain's
+`Application/Listeners/` directory. Pass `--event=domain/event` to wire it to
+a specific event — the domain can differ from the listener's own domain,
+since reacting to another context's event (never importing its entities
+directly) is exactly how bounded contexts are meant to communicate:
+
+```bash
+php artisan ddd:listener Billing/CreateInvoiceOnLeadWasCreated --event=Contact/LeadWasCreated
+```
+
+```php
+final class CreateInvoiceOnLeadWasCreated
+{
+    public function handle(LeadWasCreated $event): void
+    {
+        // TODO: react to the event. Keep this a thin orchestration step —
+        // delegate real work to a use case if it needs a transaction.
+    }
+}
+```
+
+Omit `--event` to generate a generic stub with a `handle(object $event)`
+placeholder instead. Either way, the command does not auto-register the
+listener — wire it up yourself, e.g. in the owning domain's
+`ServiceProvider::boot()`:
+
+```php
+Event::listen(LeadWasCreated::class, CreateInvoiceOnLeadWasCreated::class);
+```
+
+> **Note:** `Application/Listeners/` is not created by `ddd:domain` — it's
+> added on demand the first time a domain gets a listener.
+
 ## Configuration
 
 | Key | Default | Description |
