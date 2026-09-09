@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use {{ entity_namespace }}\{{ class }};
+
+interface {{ class }}Repository
+{
+    public function find(string $id): ?{{ class }};
+
+    public function save({{ class }} ${{ variable }}): void;
+}

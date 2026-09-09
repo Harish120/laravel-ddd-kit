@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * @internal Infrastructure-only persistence model — never exposed outside Infrastructure/.
+ */
+final class {{ class }}Model extends Model
+{
+    // TODO: set $table, $fillable/$guarded, and casts for this aggregate's persisted shape.
+}

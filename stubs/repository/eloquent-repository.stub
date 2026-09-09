@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use {{ entity_namespace }}\{{ class }};
+use {{ domain_repository_namespace }}\{{ class }}Repository;
+use {{ model_namespace }}\{{ class }}Model;
+
+final class Eloquent{{ class }}Repository implements {{ class }}Repository
+{
+    public function find(string $id): ?{{ class }}
+    {
+        $model = {{ class }}Model::find($id);
+
+        if ($model === null) {
+            return null;
+        }
+
+        // TODO: map $model's attributes onto {{ class }}::reconstitute(...).
+        return {{ class }}::reconstitute($model->getKey());
+    }
+
+    public function save({{ class }} ${{ variable }}): void
+    {
+        // TODO: map ${{ variable }}'s state onto a {{ class }}Model and persist it.
+    }
+}
