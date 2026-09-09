@@ -1,0 +1,48 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Harryes\LaravelDddKit\Domain\AggregateRoot;
+
+final class {{ class }} extends AggregateRoot
+{
+    private function __construct(
+        private readonly string $id,
+        // TODO: add constructor-promoted properties for this aggregate's state.
+    ) {
+        // TODO: validate invariants here and throw a domain exception on violation.
+    }
+
+    /**
+     * Records a new {{ class }} as a fact. Use this when the aggregate is
+     * being created for the first time — never when loading from storage.
+     */
+    public static function create(string $id /* , ...state */): self
+    {
+        $aggregate = new self($id);
+
+        // TODO: record a domain event once you've generated one, e.g.:
+        // $aggregate->record(new {{ class }}WasCreated($id));
+
+        return $aggregate;
+    }
+
+    /**
+     * Rehydrates a {{ class }} from persistence. Records no events —
+     * this is not a new fact, just loading existing state.
+     */
+    public static function reconstitute(string $id /* , ...state */): self
+    {
+        return new self($id);
+    }
+
+    public function id(): string
+    {
+        return $this->id;
+    }
+
+    // TODO: add named methods that express business intent, e.g. changeStatus().
+    // Never add public setters — state changes must go through methods like this.
+}

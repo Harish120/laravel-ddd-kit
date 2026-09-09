@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+final class {{ class }}
+{
+    private function __construct(
+        private readonly string $id,
+        // TODO: add constructor-promoted properties for this entity's state.
+    ) {
+        // TODO: validate invariants here and throw a domain exception on violation.
+    }
+
+    public static function create(string $id /* , ...state */): self
+    {
+        return new self($id);
+    }
+
+    public static function reconstitute(string $id /* , ...state */): self
+    {
+        return new self($id);
+    }
+
+    public function id(): string
+    {
+        return $this->id;
+    }
+
+    // TODO: add named methods that express business intent, e.g. changeStatus().
+    // Never add public setters — state changes must go through methods like this.
+}
