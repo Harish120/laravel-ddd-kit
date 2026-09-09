@@ -59,6 +59,54 @@ When `ddd.auto_register_providers` is enabled (the default), the generated
 If that file doesn't exist, the command fails with a clear error instead of
 registering nothing silently.
 
+### `ddd:entity`
+
+Generates an entity — or, with `--aggregate`, an aggregate root extending the
+package's framework-agnostic `AggregateRoot` base class — inside an existing
+domain's `Domain/Entities` directory. Requires the domain to already exist
+(run `ddd:domain` first).
+
+```bash
+php artisan ddd:entity Contact/Lead --aggregate
+```
+
+```
+   INFO  Generated Lead aggregate root at app/Domains/Contact/Domain/Entities/Lead.php.
+```
+
+```php
+final class Lead extends AggregateRoot
+{
+    private function __construct(
+        private readonly string $id,
+        // TODO: add constructor-promoted properties for this aggregate's state.
+    ) {
+        // TODO: validate invariants here and throw a domain exception on violation.
+    }
+
+    public static function create(string $id /* , ...state */): self
+    {
+        $aggregate = new self($id);
+
+        // TODO: record a domain event once you've generated one, e.g.:
+        // $aggregate->record(new LeadWasCreated($id));
+
+        return $aggregate;
+    }
+
+    public static function reconstitute(string $id /* , ...state */): self
+    {
+        return new self($id);
+    }
+
+    // ...
+}
+```
+
+The constructor stays private — state is only ever set through `create()`,
+`reconstitute()`, and named intent methods you add yourself. There are no
+generated setters, and none should be added by hand.
+
 ## Configuration
 
 | Key | Default | Description |
