@@ -306,6 +306,35 @@ Event::listen(LeadWasCreated::class, CreateInvoiceOnLeadWasCreated::class);
 > **Note:** `Application/Listeners/` is not created by `ddd:domain` — it's
 > added on demand the first time a domain gets a listener.
 
+### `ddd:query`
+
+Generates a CQRS-lite read query in a domain's `Application/Queries/`
+directory. Queries are the one sanctioned shortcut around the domain layer —
+they may hit Eloquent or the query builder directly for performance. Writes
+never go through a query; they always go through a use case and its
+aggregate.
+
+```bash
+php artisan ddd:query Contact/ListActiveLeads
+```
+
+```
+   INFO  Generated ListActiveLeads query at app/Domains/Contact/Application/Queries/ListActiveLeads.php.
+```
+
+```php
+final readonly class ListActiveLeads
+{
+    public function handle(): mixed
+    {
+        // TODO: query read models directly here — bypassing the domain layer
+        // is fine for reads, but never write through this class. Writes
+        // still go through a use case and its aggregate.
+        return DB::table('table_name')->get();
+    }
+}
+```
+
 ## Configuration
 
 | Key | Default | Description |

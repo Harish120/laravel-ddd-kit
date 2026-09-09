@@ -24,3 +24,5 @@ All notable changes to this project will be documented in this file.
 - `ddd:listener {domain}/{name} [--event=domain/event]` command — generates a
   listener in `Application/Listeners/`, optionally wired to a specific
   (possibly cross-domain) event.
+- `ddd:query {domain}/{name}` command — generates a CQRS-lite read query in
+  `Application/Queries/` that may bypass the domain layer for reads.
