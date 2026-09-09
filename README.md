@@ -149,6 +149,54 @@ final readonly class Email
 Fill in the constructor's `TODO` with the concept's validation rules (format,
 range, allowed values, ...) and throw a domain exception on violation.
 
+### `ddd:usecase`
+
+Generates a use case and its matching DTO. The use case is the transaction
+boundary — its body is always wrapped in `DB::transaction()`, and domain
+events are dispatched only after that transaction commits, never from the
+Domain layer itself.
+
+```bash
+php artisan ddd:usecase Contact/CreateLead
+```
+
+```
+   INFO  Generated CreateLead use case at app/Domains/Contact/Application/UseCases/CreateLead.php.
+
+   INFO  Generated CreateLeadData DTO at app/Domains/Contact/Application/DTOs/CreateLeadData.php.
+```
+
+```php
+final class CreateLead
+{
+    public function __construct(
+        // TODO: inject the domain repository interface(s) this use case needs.
+    ) {}
+
+    public function handle(CreateLeadData $data): void
+    {
+        DB::transaction(function () use ($data): void {
+            // TODO: load or create the aggregate and invoke its intent method(s).
+            // TODO: persist the aggregate via its repository interface.
+
+            // Dispatch events recorded on the aggregate — never from the Domain layer.
+            // foreach ($aggregate->pullDomainEvents() as $event) {
+            //     Event::dispatch($event);
+            // }
+        });
+    }
+}
+```
+
+```php
+final readonly class CreateLeadData
+{
+    public function __construct(
+        // TODO: add the primitive/value-object properties this use case needs.
+    ) {}
+}
+```
+
 ## Configuration
 
 | Key | Default | Description |

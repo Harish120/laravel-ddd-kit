@@ -15,3 +15,5 @@ All notable changes to this project will be documented in this file.
   `Harryes\LaravelDddKit\Domain\AggregateRoot` base class.
 - `ddd:value-object {domain}/{name}` command — generates an immutable,
   equality-by-value object with a validation TODO block.
+- `ddd:usecase {domain}/{name}` command — generates a use case and matching
+  DTO, wired for `DB::transaction` and post-transaction event dispatch.
