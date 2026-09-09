@@ -1,0 +1,55 @@
+{
+    "name": "harryes/laravel-ddd-kit",
+    "description": "Scaffold a Domain-Driven Design architecture into Laravel applications via artisan commands.",
+    "keywords": ["laravel", "ddd", "domain-driven-design", "scaffolding", "artisan"],
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Harryes"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/console": "^13.0",
+        "illuminate/support": "^13.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^11.0",
+        "pestphp/pest": "^4.4",
+        "pestphp/pest-plugin-laravel": "^4.1",
+        "phpstan/phpstan": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Harryes\\LaravelDddKit\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Harryes\\LaravelDddKit\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Harryes\\LaravelDddKit\\DddKitServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "lint": "pint --test",
+        "lint:fix": "pint",
+        "analyse": "phpstan analyse",
+        "test": "pest"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        },
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
