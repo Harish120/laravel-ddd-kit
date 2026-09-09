@@ -29,5 +29,11 @@ abstract class TestCase extends Orchestra
         {
             public function dump(string $workingDirectory): void {}
         });
+
+        // base_path('tests') resolves into vendor/orchestra/testbench-core
+        // during tests too — never let the default generate_tests behavior
+        // write companion tests there. Tests exercising that behavior
+        // re-enable this and point ddd.tests_path at a temp directory.
+        config()->set('ddd.generate_tests', false);
     }
 }

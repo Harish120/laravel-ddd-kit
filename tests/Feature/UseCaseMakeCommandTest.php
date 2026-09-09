@@ -74,3 +74,29 @@ it('fails when the name argument is missing a domain segment', function (): void
         ->assertFailed()
         ->expectsOutputToContain('Expected {domain}/{name}');
 });
+
+it('generates a companion Pest test alongside the use case', function (): void {
+    config()->set('ddd.generate_tests', true);
+    config()->set('ddd.tests_path', $this->tempRoot.'/tests');
+
+    $this->artisan('ddd:usecase', ['name' => 'Contact/CreateLead'])->assertSuccessful();
+
+    $file = "{$this->tempRoot}/tests/Unit/Domains/Contact/Application/UseCases/CreateLeadTest.php";
+
+    expect(File::exists($file))->toBeTrue()
+        ->and(File::get($file))->toContain("use {$this->namespace}\\Contact\\Application\\UseCases\\CreateLead;")
+        ->and(File::get($file))->toContain("use {$this->namespace}\\Contact\\Application\\DTOs\\CreateLeadData;")
+        ->and(File::get($file))->toContain('->todo();');
+
+    exec('php -l '.escapeshellarg($file), result_code: $exitCode, output: $output);
+    expect($exitCode)->toBe(0, implode("\n", $output));
+});
+
+it('does not generate a companion test when disabled', function (): void {
+    config()->set('ddd.generate_tests', false);
+    config()->set('ddd.tests_path', $this->tempRoot.'/tests');
+
+    $this->artisan('ddd:usecase', ['name' => 'Contact/CreateLead'])->assertSuccessful();
+
+    expect(File::exists("{$this->tempRoot}/tests/Unit/Domains/Contact/Application/UseCases/CreateLeadTest.php"))->toBeFalse();
+});

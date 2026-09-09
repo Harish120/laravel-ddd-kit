@@ -70,3 +70,28 @@ it('fails when the name argument is missing a domain segment', function (): void
         ->assertFailed()
         ->expectsOutputToContain('Expected {domain}/{name}');
 });
+
+it('generates a companion Pest test alongside the value object', function (): void {
+    config()->set('ddd.generate_tests', true);
+    config()->set('ddd.tests_path', $this->tempRoot.'/tests');
+
+    $this->artisan('ddd:value-object', ['name' => 'Contact/Email'])->assertSuccessful();
+
+    $file = "{$this->tempRoot}/tests/Unit/Domains/Contact/Domain/ValueObjects/EmailTest.php";
+
+    expect(File::exists($file))->toBeTrue()
+        ->and(File::get($file))->toContain("use {$this->namespace}\\Contact\\Domain\\ValueObjects\\Email;")
+        ->and(File::get($file))->toContain('equals');
+
+    exec('php -l '.escapeshellarg($file), result_code: $exitCode, output: $output);
+    expect($exitCode)->toBe(0, implode("\n", $output));
+});
+
+it('does not generate a companion test when disabled', function (): void {
+    config()->set('ddd.generate_tests', false);
+    config()->set('ddd.tests_path', $this->tempRoot.'/tests');
+
+    $this->artisan('ddd:value-object', ['name' => 'Contact/Email'])->assertSuccessful();
+
+    expect(File::exists("{$this->tempRoot}/tests/Unit/Domains/Contact/Domain/ValueObjects/EmailTest.php"))->toBeFalse();
+});
