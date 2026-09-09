@@ -107,6 +107,48 @@ The constructor stays private — state is only ever set through `create()`,
 `reconstitute()`, and named intent methods you add yourself. There are no
 generated setters, and none should be added by hand.
 
+### `ddd:value-object`
+
+Generates an immutable, equality-by-value object inside a domain's
+`Domain/ValueObjects` directory. Requires the domain to already exist.
+
+```bash
+php artisan ddd:value-object Contact/Email
+```
+
+```
+   INFO  Generated Email value object at app/Domains/Contact/Domain/ValueObjects/Email.php.
+```
+
+```php
+final readonly class Email
+{
+    public function __construct(
+        private string $value,
+    ) {
+        // TODO: validate $value here and throw a domain exception on violation.
+    }
+
+    public function value(): string
+    {
+        return $this->value;
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+}
+```
+
+Fill in the constructor's `TODO` with the concept's validation rules (format,
+range, allowed values, ...) and throw a domain exception on violation.
+
 ## Configuration
 
 | Key | Default | Description |

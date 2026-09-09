@@ -13,3 +13,5 @@ All notable changes to this project will be documented in this file.
 - `ddd:entity {domain}/{name} [--aggregate]` command — generates a plain entity
   or, with `--aggregate`, an aggregate root extending the new framework-agnostic
   `Harryes\LaravelDddKit\Domain\AggregateRoot` base class.
+- `ddd:value-object {domain}/{name}` command — generates an immutable,
+  equality-by-value object with a validation TODO block.
