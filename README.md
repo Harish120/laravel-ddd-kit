@@ -335,6 +335,42 @@ final readonly class ListActiveLeads
 }
 ```
 
+### `ddd:doctor`
+
+Statically scans `app/Domains/**` for violations of the non-negotiables that
+generated code alone can't guarantee — useful after hand-editing generated
+stubs, or as a CI gate. It exits non-zero when it finds violations, so it's
+safe to run in a pipeline.
+
+```bash
+php artisan ddd:doctor
+```
+
+```
++---------------------------------------------+-----------------------------------------------------------+
+| File:Line                                   | Rule violated                                              |
++---------------------------------------------+-----------------------------------------------------------+
+| Contact/Domain/Entities/BadEntity.php:7     | Domain layer must not import Illuminate/Eloquent classes. |
+| Contact/Domain/Entities/BadEntity.php:13    | Entities must not expose public setters.                   |
+| Contact/Domain/Entities/BadEntity.php:11    | Entities must not expose public properties.                |
+| Contact/Application/UseCases/BadUseCase.php | Use cases must wrap writes in DB::transaction().           |
++---------------------------------------------+-----------------------------------------------------------+
+```
+
+It checks:
+
+- No `use Illuminate\...` imports anywhere under a domain's `Domain/` layer.
+- No public setters (`setX()`) or public properties on classes in
+  `Domain/Entities/`.
+- Every class in `Application/UseCases/` contains a `DB::transaction(` call.
+- No repository under `Infrastructure/.../Repositories/` returns a type
+  ending in `Model` from a public method.
+
+> **Heuristic, not an AST parser.** These checks are line-based regex scans,
+> not a full PHP parser — kept deliberately dependency-free (per the
+> zero-runtime-dependency goal) at the cost of being fooled by unusual
+> formatting. Treat findings as a strong signal, not a guarantee.
+
 ## Configuration
 
 | Key | Default | Description |

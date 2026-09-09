@@ -26,3 +26,9 @@ All notable changes to this project will be documented in this file.
   (possibly cross-domain) event.
 - `ddd:query {domain}/{name}` command — generates a CQRS-lite read query in
   `Application/Queries/` that may bypass the domain layer for reads.
+- `ddd:doctor` command — static, regex-based scan of `app/Domains/**` for
+  Illuminate imports in `Domain/`, public entity state, use cases missing a
+  `DB::transaction()`, and repositories returning Eloquent models. Exits
+  non-zero on violations, suitable as a CI gate.
+
+This completes the full command set from the original build order (§5).
