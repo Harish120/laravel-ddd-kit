@@ -6,6 +6,7 @@ namespace Harryes\LaravelDddKit;
 
 use Harryes\LaravelDddKit\Console\Commands\DomainMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\EntityMakeCommand;
+use Harryes\LaravelDddKit\Console\Commands\ValueObjectMakeCommand;
 use Illuminate\Support\ServiceProvider;
 
 final class DddKitServiceProvider extends ServiceProvider
@@ -32,6 +33,7 @@ final class DddKitServiceProvider extends ServiceProvider
         $this->commands([
             DomainMakeCommand::class,
             EntityMakeCommand::class,
+            ValueObjectMakeCommand::class,
         ]);
     }
 }
