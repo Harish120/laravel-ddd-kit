@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+use {{ namespace }}\{{ class }};
+
+it('is equal to another instance with the same value', function (): void {
+    $a = new {{ class }}('example');
+    $b = new {{ class }}('example');
+
+    expect($a->equals($b))->toBeTrue();
+});
+
+it('is not equal to an instance with a different value', function (): void {
+    $a = new {{ class }}('example');
+    $b = new {{ class }}('different');
+
+    expect($a->equals($b))->toBeFalse();
+});
+
+it('casts to its underlying value as a string', function (): void {
+    $value = new {{ class }}('example');
+
+    expect((string) $value)->toBe('example');
+});

@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+use {{ dto_namespace }}\{{ class }}Data;
+use {{ namespace }}\{{ class }};
+
+// TODO: replace this with an in-memory fake implementing the repository
+// interface(s) you inject into {{ class }}'s constructor, then assert
+// against its recorded state and the domain events it dispatched.
+it('runs {{ class }} inside a transaction', function (): void {
+    $useCase = new {{ class }}();
+
+    $useCase->handle(new {{ class }}Data());
+})->todo();

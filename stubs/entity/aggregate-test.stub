@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+use {{ namespace }}\{{ class }};
+
+it('creates a new {{ class }} and exposes its id', function (): void {
+    $aggregate = {{ class }}::create('1');
+
+    expect($aggregate->id())->toBe('1');
+});
+
+it('reconstitutes a {{ class }} from persisted state without recording new events', function (): void {
+    $aggregate = {{ class }}::reconstitute('1');
+
+    expect($aggregate->pullDomainEvents())->toBe([]);
+});
+
+it('pulling domain events clears them', function (): void {
+    $aggregate = {{ class }}::create('1');
+
+    $aggregate->pullDomainEvents();
+
+    expect($aggregate->pullDomainEvents())->toBe([]);
+});

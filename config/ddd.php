@@ -79,4 +79,29 @@ return [
 
     'auto_dump_autoload' => true,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Generate matching Pest tests
+    |--------------------------------------------------------------------------
+    |
+    | When true, ddd:entity, ddd:value-object, and ddd:usecase each also
+    | generate a companion Pest test alongside the stub.
+    |
+    */
+
+    'generate_tests' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Root path for generated tests
+    |--------------------------------------------------------------------------
+    |
+    | Companion tests mirror the domain's source path under this root, e.g.
+    | "{tests_path}/Unit/Domains/Contact/Domain/Entities/LeadTest.php". Null
+    | uses the application's default tests directory.
+    |
+    */
+
+    'tests_path' => null,
+
 ];

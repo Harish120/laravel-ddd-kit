@@ -61,6 +61,12 @@ final class EntityMakeCommand extends Command
         $kind = $isAggregate ? 'aggregate root' : 'entity';
         $this->components->info("Generated {$entity} {$kind} at {$file}.");
 
+        $this->writeCompanionTest(
+            $this->testsBasePath()."/Unit/Domains/{$domain}/Domain/Entities/{$entity}Test.php",
+            $isAggregate ? 'entity/aggregate-test.stub' : 'entity/entity-test.stub',
+            ['namespace' => $namespace, 'class' => $entity]
+        );
+
         return self::SUCCESS;
     }
 }

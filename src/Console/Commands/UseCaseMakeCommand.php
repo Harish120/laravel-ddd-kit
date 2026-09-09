@@ -73,6 +73,12 @@ final class UseCaseMakeCommand extends Command
         $this->components->info("Generated {$useCase} use case at {$useCaseFile}.");
         $this->components->info("Generated {$useCase}Data DTO at {$dtoFile}.");
 
+        $this->writeCompanionTest(
+            $this->testsBasePath()."/Unit/Domains/{$domain}/Application/UseCases/{$useCase}Test.php",
+            'usecase/usecase-test.stub',
+            ['namespace' => $useCaseNamespace, 'dto_namespace' => $dtoNamespace, 'class' => $useCase]
+        );
+
         return self::SUCCESS;
     }
 }

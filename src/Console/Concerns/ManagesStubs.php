@@ -34,4 +34,26 @@ trait ManagesStubs
 
         return str_replace($search, array_values($replacements), $stub);
     }
+
+    private function testsBasePath(): string
+    {
+        return rtrim((string) (config('ddd.tests_path') ?: base_path('tests')), '/');
+    }
+
+    /**
+     * Generate a companion Pest test alongside a stub, unless disabled.
+     *
+     * @param  array<string, string>  $replacements
+     */
+    private function writeCompanionTest(string $testFile, string $stubName, array $replacements): void
+    {
+        if (! (bool) config('ddd.generate_tests')) {
+            return;
+        }
+
+        File::ensureDirectoryExists(dirname($testFile));
+        File::put($testFile, $this->populateStub($this->stub($stubName), $replacements));
+
+        $this->components->info("Generated test at {$testFile}.");
+    }
 }

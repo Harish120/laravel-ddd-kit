@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+use {{ namespace }}\{{ class }};
+
+it('creates a new {{ class }} and exposes its id', function (): void {
+    $entity = {{ class }}::create('1');
+
+    expect($entity->id())->toBe('1');
+});
+
+it('reconstitutes a {{ class }} from persisted state', function (): void {
+    $entity = {{ class }}::reconstitute('1');
+
+    expect($entity->id())->toBe('1');
+});

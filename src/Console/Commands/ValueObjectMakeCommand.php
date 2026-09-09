@@ -57,6 +57,12 @@ final class ValueObjectMakeCommand extends Command
 
         $this->components->info("Generated {$valueObject} value object at {$file}.");
 
+        $this->writeCompanionTest(
+            $this->testsBasePath()."/Unit/Domains/{$domain}/Domain/ValueObjects/{$valueObject}Test.php",
+            'value-object/value-object-test.stub',
+            ['namespace' => $namespace, 'class' => $valueObject]
+        );
+
         return self::SUCCESS;
     }
 }
