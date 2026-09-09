@@ -65,4 +65,18 @@ return [
 
     'providers_file' => null,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Auto-dump the Composer autoloader
+    |--------------------------------------------------------------------------
+    |
+    | When true, ddd:domain refreshes the Composer autoloader after
+    | scaffolding. Only matters for apps using an optimized/classmap
+    | autoloader — plain PSR-4 autoloading already finds new files without
+    | it — and silently no-ops if composer isn't available.
+    |
+    */
+
+    'auto_dump_autoload' => true,
+
 ];

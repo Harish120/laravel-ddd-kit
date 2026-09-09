@@ -13,6 +13,8 @@ use Harryes\LaravelDddKit\Console\Commands\QueryMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\RepositoryMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\UseCaseMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\ValueObjectMakeCommand;
+use Harryes\LaravelDddKit\Support\AutoloadDumper;
+use Harryes\LaravelDddKit\Support\ComposerAutoloadDumper;
 use Illuminate\Support\ServiceProvider;
 
 final class DddKitServiceProvider extends ServiceProvider
@@ -20,6 +22,8 @@ final class DddKitServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/ddd.php', 'ddd');
+
+        $this->app->bind(AutoloadDumper::class, ComposerAutoloadDumper::class);
     }
 
     public function boot(): void
