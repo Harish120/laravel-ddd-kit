@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Harryes\LaravelDddKit;
 
+use Harryes\LaravelDddKit\Console\Commands\DoctorCommand;
 use Harryes\LaravelDddKit\Console\Commands\DomainMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\EntityMakeCommand;
 use Harryes\LaravelDddKit\Console\Commands\EventMakeCommand;
@@ -44,6 +45,7 @@ final class DddKitServiceProvider extends ServiceProvider
             EventMakeCommand::class,
             ListenerMakeCommand::class,
             QueryMakeCommand::class,
+            DoctorCommand::class,
         ]);
     }
 }
