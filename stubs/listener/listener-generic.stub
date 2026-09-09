@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+final class {{ class }}
+{
+    public function handle(object $event): void
+    {
+        // TODO: type-hint $event to the specific domain event this listens for,
+        // e.g. use App\Domains\Contact\Domain\Events\LeadWasCreated;
+
+        // TODO: react to the event. Keep this a thin orchestration step —
+        // delegate real work to a use case if it needs a transaction.
+    }
+}

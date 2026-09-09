@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use {{ event_namespace }}\{{ event_class }};
+
+final class {{ class }}
+{
+    public function handle({{ event_class }} $event): void
+    {
+        // TODO: react to the event. Keep this a thin orchestration step —
+        // delegate real work to a use case if it needs a transaction.
+    }
+}
