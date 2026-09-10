@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Harryes\LaravelDddKit\Console\Commands;
 
 use Harryes\LaravelDddKit\Console\Concerns\ManagesStubs;
+use Harryes\LaravelDddKit\Console\Concerns\ReadsTypedInput;
+use Harryes\LaravelDddKit\Support\Config;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -12,6 +14,7 @@ use Illuminate\Support\Str;
 final class ListenerMakeCommand extends Command
 {
     use ManagesStubs;
+    use ReadsTypedInput;
 
     protected $signature = 'ddd:listener
         {name : Domain and listener name, e.g. Billing/CreateInvoiceOnLeadWasCreated}
@@ -21,7 +24,7 @@ final class ListenerMakeCommand extends Command
 
     public function handle(): int
     {
-        $segments = explode('/', (string) $this->argument('name'));
+        $segments = explode('/', $this->stringArgument('name'));
 
         if (count($segments) !== 2 || $segments[0] === '' || $segments[1] === '') {
             $this->components->error('Expected {domain}/{name}, e.g. Billing/CreateInvoiceOnLeadWasCreated.');
@@ -33,7 +36,7 @@ final class ListenerMakeCommand extends Command
 
         $domain = Str::studly($domainInput);
         $listener = Str::studly($nameInput);
-        $domainPath = rtrim((string) config('ddd.base_path'), '/').'/'.$domain;
+        $domainPath = rtrim(Config::string('ddd.base_path'), '/').'/'.$domain;
 
         if (! File::isDirectory($domainPath.'/Domain')) {
             $this->components->error("Domain [{$domain}] does not exist. Run `ddd:domain {$domain}` first.");
@@ -49,8 +52,8 @@ final class ListenerMakeCommand extends Command
             return self::FAILURE;
         }
 
-        $namespace = rtrim((string) config('ddd.base_namespace'), '\\')."\\{$domain}\\Application\\Listeners";
-        $eventOption = $this->option('event');
+        $namespace = rtrim(Config::string('ddd.base_namespace'), '\\')."\\{$domain}\\Application\\Listeners";
+        $eventOption = $this->stringOption('event');
 
         if ($eventOption === null) {
             File::ensureDirectoryExists(dirname($file));
@@ -65,7 +68,7 @@ final class ListenerMakeCommand extends Command
             return self::SUCCESS;
         }
 
-        $event = $this->resolveEvent((string) $eventOption);
+        $event = $this->resolveEvent($eventOption);
 
         if ($event === null) {
             return self::FAILURE;
@@ -107,7 +110,7 @@ final class ListenerMakeCommand extends Command
 
         $eventDomain = Str::studly($eventDomainInput);
         $eventName = Str::studly($eventNameInput);
-        $eventDomainPath = rtrim((string) config('ddd.base_path'), '/').'/'.$eventDomain;
+        $eventDomainPath = rtrim(Config::string('ddd.base_path'), '/').'/'.$eventDomain;
         $eventFile = $eventDomainPath.'/Domain/Events/'.$eventName.'.php';
 
         if (! File::exists($eventFile)) {
@@ -119,7 +122,7 @@ final class ListenerMakeCommand extends Command
             return null;
         }
 
-        $eventNamespace = rtrim((string) config('ddd.base_namespace'), '\\')."\\{$eventDomain}\\Domain\\Events";
+        $eventNamespace = rtrim(Config::string('ddd.base_namespace'), '\\')."\\{$eventDomain}\\Domain\\Events";
 
         return [$eventNamespace, $eventName];
     }

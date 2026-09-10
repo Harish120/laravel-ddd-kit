@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Harryes\LaravelDddKit\Console\Commands;
 
 use Harryes\LaravelDddKit\Console\Concerns\ManagesStubs;
+use Harryes\LaravelDddKit\Console\Concerns\ReadsTypedInput;
+use Harryes\LaravelDddKit\Support\Config;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -12,6 +14,7 @@ use Illuminate\Support\Str;
 final class QueryMakeCommand extends Command
 {
     use ManagesStubs;
+    use ReadsTypedInput;
 
     protected $signature = 'ddd:query {name : Domain and query name, e.g. Contact/ListActiveLeads}';
 
@@ -19,7 +22,7 @@ final class QueryMakeCommand extends Command
 
     public function handle(): int
     {
-        $segments = explode('/', (string) $this->argument('name'));
+        $segments = explode('/', $this->stringArgument('name'));
 
         if (count($segments) !== 2 || $segments[0] === '' || $segments[1] === '') {
             $this->components->error('Expected {domain}/{name}, e.g. Contact/ListActiveLeads.');
@@ -31,7 +34,7 @@ final class QueryMakeCommand extends Command
 
         $domain = Str::studly($domainInput);
         $query = Str::studly($nameInput);
-        $domainPath = rtrim((string) config('ddd.base_path'), '/').'/'.$domain;
+        $domainPath = rtrim(Config::string('ddd.base_path'), '/').'/'.$domain;
 
         if (! File::isDirectory($domainPath.'/Domain')) {
             $this->components->error("Domain [{$domain}] does not exist. Run `ddd:domain {$domain}` first.");
@@ -47,7 +50,7 @@ final class QueryMakeCommand extends Command
             return self::FAILURE;
         }
 
-        $namespace = rtrim((string) config('ddd.base_namespace'), '\\')."\\{$domain}\\Application\\Queries";
+        $namespace = rtrim(Config::string('ddd.base_namespace'), '\\')."\\{$domain}\\Application\\Queries";
 
         File::ensureDirectoryExists(dirname($file));
         File::put($file, $this->populateStub($this->stub('query/query.stub'), [

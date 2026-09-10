@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Harryes\LaravelDddKit\Console\Commands;
 
 use Harryes\LaravelDddKit\Console\Concerns\ManagesStubs;
+use Harryes\LaravelDddKit\Console\Concerns\ReadsTypedInput;
+use Harryes\LaravelDddKit\Support\Config;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -12,6 +14,7 @@ use Illuminate\Support\Str;
 final class ValueObjectMakeCommand extends Command
 {
     use ManagesStubs;
+    use ReadsTypedInput;
 
     protected $signature = 'ddd:value-object {name : Domain and value object name, e.g. Contact/Email}';
 
@@ -19,7 +22,7 @@ final class ValueObjectMakeCommand extends Command
 
     public function handle(): int
     {
-        $segments = explode('/', (string) $this->argument('name'));
+        $segments = explode('/', $this->stringArgument('name'));
 
         if (count($segments) !== 2 || $segments[0] === '' || $segments[1] === '') {
             $this->components->error('Expected {domain}/{name}, e.g. Contact/Email.');
@@ -31,7 +34,7 @@ final class ValueObjectMakeCommand extends Command
 
         $domain = Str::studly($domainInput);
         $valueObject = Str::studly($nameInput);
-        $domainPath = rtrim((string) config('ddd.base_path'), '/').'/'.$domain;
+        $domainPath = rtrim(Config::string('ddd.base_path'), '/').'/'.$domain;
 
         if (! File::isDirectory($domainPath.'/Domain')) {
             $this->components->error("Domain [{$domain}] does not exist. Run `ddd:domain {$domain}` first.");
@@ -47,7 +50,7 @@ final class ValueObjectMakeCommand extends Command
             return self::FAILURE;
         }
 
-        $namespace = rtrim((string) config('ddd.base_namespace'), '\\')."\\{$domain}\\Domain\\ValueObjects";
+        $namespace = rtrim(Config::string('ddd.base_namespace'), '\\')."\\{$domain}\\Domain\\ValueObjects";
 
         File::ensureDirectoryExists(dirname($file));
         File::put($file, $this->populateStub(

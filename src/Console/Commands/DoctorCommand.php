@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Harryes\LaravelDddKit\Console\Commands;
 
+use Harryes\LaravelDddKit\Support\Config;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\SplFileInfo;
@@ -18,7 +19,7 @@ final class DoctorCommand extends Command
 
     public function handle(): int
     {
-        $this->basePath = rtrim((string) config('ddd.base_path'), '/');
+        $this->basePath = rtrim(Config::string('ddd.base_path'), '/');
 
         if (! File::isDirectory($this->basePath)) {
             $this->components->info("No domains found at {$this->basePath}.");

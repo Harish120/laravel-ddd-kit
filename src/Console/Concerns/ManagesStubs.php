@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Harryes\LaravelDddKit\Console\Concerns;
 
+use Harryes\LaravelDddKit\Support\Config;
 use Illuminate\Support\Facades\File;
 
 trait ManagesStubs
@@ -13,9 +14,9 @@ trait ManagesStubs
      */
     private function stub(string $name): string
     {
-        $published = config('ddd.stubs_path');
+        $published = Config::nullableString('ddd.stubs_path');
 
-        $path = $published && File::exists($published.'/'.$name)
+        $path = $published !== null && File::exists($published.'/'.$name)
             ? $published.'/'.$name
             : __DIR__.'/../../../stubs/'.$name;
 
@@ -37,7 +38,7 @@ trait ManagesStubs
 
     private function testsBasePath(): string
     {
-        return rtrim((string) (config('ddd.tests_path') ?: base_path('tests')), '/');
+        return rtrim(Config::nullableString('ddd.tests_path') ?? base_path('tests'), '/');
     }
 
     /**

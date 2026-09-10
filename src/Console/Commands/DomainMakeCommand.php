@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Harryes\LaravelDddKit\Console\Commands;
 
 use Harryes\LaravelDddKit\Console\Concerns\ManagesStubs;
+use Harryes\LaravelDddKit\Console\Concerns\ReadsTypedInput;
 use Harryes\LaravelDddKit\Support\AutoloadDumper;
+use Harryes\LaravelDddKit\Support\Config;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -16,6 +18,7 @@ use function Laravel\Prompts\text;
 final class DomainMakeCommand extends Command
 {
     use ManagesStubs;
+    use ReadsTypedInput;
 
     protected $signature = 'ddd:domain
         {name : The domain name, e.g. Contact}
@@ -43,8 +46,8 @@ final class DomainMakeCommand extends Command
 
     public function handle(AutoloadDumper $autoloadDumper): int
     {
-        $domain = Str::studly((string) $this->argument('name'));
-        $path = rtrim((string) config('ddd.base_path'), '/').'/'.$domain;
+        $domain = Str::studly($this->stringArgument('name'));
+        $path = rtrim(Config::string('ddd.base_path'), '/').'/'.$domain;
 
         if (File::isDirectory($path)) {
             $this->components->error("Domain [{$domain}] already exists at {$path}.");
@@ -62,7 +65,7 @@ final class DomainMakeCommand extends Command
             }
         }
 
-        $namespace = rtrim((string) config('ddd.base_namespace'), '\\').'\\'.$domain;
+        $namespace = rtrim(Config::string('ddd.base_namespace'), '\\').'\\'.$domain;
 
         File::put(
             $path.'/Infrastructure/Providers/'.$domain.'ServiceProvider.php',
@@ -132,7 +135,7 @@ final class DomainMakeCommand extends Command
 
     private function registerServiceProvider(string $namespace, string $domain): void
     {
-        $providersFile = config('ddd.providers_file') ?: base_path('bootstrap/providers.php');
+        $providersFile = Config::nullableString('ddd.providers_file') ?? base_path('bootstrap/providers.php');
 
         if (! File::exists($providersFile)) {
             $this->components->error(
