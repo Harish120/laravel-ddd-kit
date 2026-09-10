@@ -1,13 +1,42 @@
 # Laravel DDD Kit
 
+[![tests](https://github.com/Harish120/laravel-ddd-kit/actions/workflows/tests.yml/badge.svg)](https://github.com/Harish120/laravel-ddd-kit/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
+
 Scaffold a real Domain-Driven Design architecture into your Laravel application —
 Domain / Application / Infrastructure layers, aggregate roots, value objects, and
-domain events — via `ddd:*` artisan commands.
+domain events — via `ddd:*` artisan commands. Every generated stub enforces the
+same discipline: no public setters, mandatory value objects, aggregate-only
+repositories, and use cases as the one transaction boundary. `ddd:doctor` then
+checks that discipline holds even after you've hand-edited the generated code.
+
+## Contents
+
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick start](#quick-start)
+- [Commands](#commands)
+  - [`ddd:domain`](#ddd-domain) ([interactive mode](#interactive-mode))
+  - [`ddd:entity`](#ddd-entity)
+  - [`ddd:value-object`](#ddd-value-object)
+  - [`ddd:usecase`](#ddd-usecase)
+  - [Companion Pest tests](#companion-pest-tests)
+  - [`ddd:repository`](#ddd-repository)
+  - [`ddd:event` and `ddd:listener`](#ddd-event-and-ddd-listener)
+  - [`ddd:query`](#ddd-query)
+  - [`ddd:doctor`](#ddd-doctor)
+- [Configuration](#configuration)
+- [Testing](#testing)
+- [License](#license)
+
+<a id="requirements"></a>
 
 ## Requirements
 
 - PHP ^8.3
 - Laravel ^13.0
+
+<a id="installation"></a>
 
 ## Installation
 
@@ -22,7 +51,40 @@ customize the base namespace, base path, or stub overrides:
 php artisan vendor:publish --tag=ddd-config
 ```
 
+<a id="quick-start"></a>
+
+## Quick start
+
+A full, wired module in nine commands:
+
+```bash
+php artisan ddd:domain Contact
+php artisan ddd:domain Billing
+php artisan ddd:entity Contact/Lead --aggregate
+php artisan ddd:value-object Contact/Email
+php artisan ddd:repository Contact/Lead
+php artisan ddd:usecase Contact/CreateLead
+php artisan ddd:event Contact/LeadWasCreated
+php artisan ddd:listener Billing/CreateInvoiceOnLeadWasCreated --event=Contact/LeadWasCreated
+php artisan ddd:query Contact/ListActiveLeads
+php artisan ddd:doctor
+```
+
+That's two modules — `Contact` and `Billing` — with a bound repository, a
+transactional use case, a listener in `Billing` reacting to an event owned by
+`Contact` (without importing anything from it), and a CQRS read query, all
+with `ddd:doctor` reporting zero violations at the end. Every command after
+the first two requires a domain that already exists (an entity needs its own
+domain, a repository needs its aggregate, a listener needs both domains
+involved); each section below says exactly what it needs and why. If you'd
+rather explore interactively, jump to
+[`ddd:domain`'s `--interactive` mode](#interactive-mode) instead.
+
+<a id="commands"></a>
+
 ## Commands
+
+<a id="ddd-domain"></a>
 
 ### `ddd:domain`
 
@@ -65,6 +127,8 @@ an optimized/classmap autoloader — plain PSR-4 autoloading already finds new
 files without it — and it silently does nothing if there's no `composer.json`
 or no `composer` binary on the `PATH`.
 
+<a id="interactive-mode"></a>
+
 #### Interactive mode
 
 Pass `--interactive` to immediately generate a first building block after the
@@ -79,6 +143,8 @@ use case, repository — multiple selection allowed) and then for each one's
 name, exactly as if you'd run `ddd:entity --aggregate`, `ddd:value-object`,
 `ddd:usecase`, and `ddd:repository` yourself afterward. Selecting nothing
 just leaves you with the plain module scaffold.
+
+<a id="ddd-entity"></a>
 
 ### `ddd:entity`
 
@@ -128,6 +194,8 @@ The constructor stays private — state is only ever set through `create()`,
 `reconstitute()`, and named intent methods you add yourself. There are no
 generated setters, and none should be added by hand.
 
+<a id="ddd-value-object"></a>
+
 ### `ddd:value-object`
 
 Generates an immutable, equality-by-value object inside a domain's
@@ -169,6 +237,8 @@ final readonly class Email
 
 Fill in the constructor's `TODO` with the concept's validation rules (format,
 range, allowed values, ...) and throw a domain exception on violation.
+
+<a id="ddd-usecase"></a>
 
 ### `ddd:usecase`
 
@@ -218,11 +288,24 @@ final readonly class CreateLeadData
 }
 ```
 
+<a id="companion-pest-tests"></a>
+
 ### Companion Pest tests
 
 `ddd:entity`, `ddd:value-object`, and `ddd:usecase` each also generate a
 matching Pest test under `tests/Unit/Domains/...`, mirroring the source path.
 These are plain unit tests with no framework bootstrap — no `uses(TestCase::class)`.
+
+> **Requires Pest in your app.** A stock `laravel new` app ships PHPUnit only,
+> so these generated `it(...)`/`expect(...)` files won't run until you add
+> Pest yourself:
+>
+> ```bash
+> composer require pestphp/pest pestphp/pest-plugin-laravel --dev
+> vendor/bin/pest --init
+> ```
+>
+> Already have Pest? Nothing to do — the files just work.
 
 ```
    INFO  Generated Lead aggregate root at app/Domains/Contact/Domain/Entities/Lead.php.
@@ -255,6 +338,8 @@ interface(s) you inject — a real assertion isn't possible until then.
 Disable this entirely with `ddd.generate_tests => false`, or redirect the
 output location with `ddd.tests_path`.
 
+<a id="ddd-repository"></a>
+
 ### `ddd:repository`
 
 Generates a repository interface (`Domain/Repositories/`), a minimal Eloquent
@@ -264,7 +349,9 @@ aggregate — then binds the interface to the implementation in the domain's
 `ServiceProvider` automatically. Requires the aggregate to already exist
 (`ddd:entity {domain}/{name} --aggregate`); warns (without failing) if the
 target entity doesn't extend `AggregateRoot`, since repositories should only
-expose aggregate roots.
+expose aggregate roots. Naming follows the aggregate: `{Name}Repository` for
+the interface, `{Name}Model` for the Eloquent model, `Eloquent{Name}Repository`
+for the implementation.
 
 ```bash
 php artisan ddd:repository Contact/Lead
@@ -310,6 +397,8 @@ final class EloquentLeadRepository implements LeadRepository
     }
 }
 ```
+
+<a id="ddd-event-and-ddd-listener"></a>
 
 ### `ddd:event` and `ddd:listener`
 
@@ -364,6 +453,8 @@ Event::listen(LeadWasCreated::class, CreateInvoiceOnLeadWasCreated::class);
 > **Note:** `Application/Listeners/` is not created by `ddd:domain` — it's
 > added on demand the first time a domain gets a listener.
 
+<a id="ddd-query"></a>
+
 ### `ddd:query`
 
 Generates a CQRS-lite read query in a domain's `Application/Queries/`
@@ -392,6 +483,8 @@ final readonly class ListActiveLeads
     }
 }
 ```
+
+<a id="ddd-doctor"></a>
 
 ### `ddd:doctor`
 
@@ -425,9 +518,11 @@ It checks:
   ending in `Model` from a public method.
 
 > **Heuristic, not an AST parser.** These checks are line-based regex scans,
-> not a full PHP parser — kept deliberately dependency-free (per the
-> zero-runtime-dependency goal) at the cost of being fooled by unusual
-> formatting. Treat findings as a strong signal, not a guarantee.
+> not a full PHP parser — deliberately avoiding a parser dependency at the
+> cost of being fooled by unusual formatting. Treat findings as a strong
+> signal, not a guarantee.
+
+<a id="configuration"></a>
 
 ## Configuration
 
@@ -442,13 +537,20 @@ It checks:
 | `generate_tests` | `true` | Generate a companion Pest test alongside `ddd:entity`, `ddd:value-object`, and `ddd:usecase` stubs. |
 | `tests_path` | `null` | Override the root for generated companion tests. Null uses `base_path('tests')`. |
 
+<a id="testing"></a>
+
 ## Testing
 
+These run the package's own test suite — for testing code `ddd:*` generates
+in *your* app, see [Companion Pest tests](#companion-pest-tests).
+
 ```bash
-composer test
-composer lint
-composer analyse
+composer test     # Pest
+composer lint     # Pint
+composer analyse  # PHPStan, level max
 ```
+
+<a id="license"></a>
 
 ## License
 
