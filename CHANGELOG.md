@@ -54,3 +54,11 @@ This completes all of §7's differentiators.
   — that directory always receives a real `{Domain}ServiceProvider.php` in the
   same run, so the placeholder was always immediately redundant. Found by
   dogfooding the package end-to-end in a real Laravel 13 app.
+
+### Changed
+
+- PHPStan raised from level 6 to `max` (level 9) on `src/`, enforced in CI.
+  Every `config()`/`Command::argument()`/`Command::option()` read — all
+  natively `mixed` — is now narrowed through two small helpers,
+  `Harryes\LaravelDddKit\Support\Config` and the
+  `Console\Concerns\ReadsTypedInput` trait, instead of unchecked casts.
