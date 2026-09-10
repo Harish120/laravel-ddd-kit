@@ -54,7 +54,12 @@ final class DomainMakeCommand extends Command
 
         foreach (self::DIRECTORIES as $directory) {
             File::ensureDirectoryExists($path.'/'.$directory);
-            File::put($path.'/'.$directory.'/.gitkeep', '');
+
+            // Infrastructure/Providers always gets a real ServiceProvider
+            // file below, so it never needs a placeholder to stay tracked.
+            if ($directory !== 'Infrastructure/Providers') {
+                File::put($path.'/'.$directory.'/.gitkeep', '');
+            }
         }
 
         $namespace = rtrim((string) config('ddd.base_namespace'), '\\').'\\'.$domain;

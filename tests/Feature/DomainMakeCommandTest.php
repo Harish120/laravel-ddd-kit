@@ -45,6 +45,10 @@ it('scaffolds the full ddd folder shape for a new domain', function (): void {
     foreach ($expectedDirectories as $directory) {
         expect(File::isDirectory("{$this->domainsPath}/Contact/{$directory}"))->toBeTrue();
     }
+
+    // Infrastructure/Providers always gets a real ServiceProvider file in
+    // the same run, so it should never carry a redundant .gitkeep.
+    expect(File::exists("{$this->domainsPath}/Contact/Infrastructure/Providers/.gitkeep"))->toBeFalse();
 });
 
 it('generates a service provider with the correct namespace that lints clean', function (): void {

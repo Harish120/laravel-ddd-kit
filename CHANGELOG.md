@@ -47,3 +47,10 @@ This completes the full command set from the original build order (§5).
   use case's real dependencies aren't known at generation time.
 
 This completes all of §7's differentiators.
+
+### Fixed
+
+- `ddd:domain` no longer writes a stray `.gitkeep` into `Infrastructure/Providers/`
+  — that directory always receives a real `{Domain}ServiceProvider.php` in the
+  same run, so the placeholder was always immediately redundant. Found by
+  dogfooding the package end-to-end in a real Laravel 13 app.
