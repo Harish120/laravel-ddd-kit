@@ -4,6 +4,11 @@
     "keywords": ["laravel", "ddd", "domain-driven-design", "scaffolding", "artisan"],
     "license": "MIT",
     "type": "library",
+    "homepage": "https://github.com/Harish120/laravel-ddd-kit",
+    "support": {
+        "issues": "https://github.com/Harish120/laravel-ddd-kit/issues",
+        "source": "https://github.com/Harish120/laravel-ddd-kit"
+    },
     "authors": [
         {
             "name": "Harryes"
