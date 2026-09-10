@@ -1,6 +1,32 @@
+# Dependencies
 /vendor
-/build
 composer.lock
-.phpunit.cache
+
+# Build artifacts
+/build
+/coverage
+/coverage.xml
+/clover.xml
+
+# PHPUnit / Pest caches
+/.phpunit.cache
 .phpunit.result.cache
+
+# Local environment (this is a package, not an app, but never risk it)
+.env
+.env.*
+!.env.example
+
+# Editors / IDEs
+.idea
+.vscode
+.fleet
+.nova
+.phpactor.json
+*.swp
+*.swo
+*~
+
+# OS cruft
 .DS_Store
+Thumbs.db
