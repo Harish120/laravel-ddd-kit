@@ -1,6 +1,8 @@
 # Laravel DDD Kit
 
 [![tests](https://github.com/Harish120/laravel-ddd-kit/actions/workflows/tests.yml/badge.svg)](https://github.com/Harish120/laravel-ddd-kit/actions/workflows/tests.yml)
+[![Latest Version](https://img.shields.io/packagist/v/harryes/laravel-ddd-kit.svg)](https://packagist.org/packages/harryes/laravel-ddd-kit)
+[![Total Downloads](https://img.shields.io/packagist/dt/harryes/laravel-ddd-kit.svg)](https://packagist.org/packages/harryes/laravel-ddd-kit)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
 Scaffold a real Domain-Driven Design architecture into your Laravel application —
