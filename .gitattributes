@@ -7,4 +7,3 @@
 /phpstan.neon export-ignore
 /phpunit.xml.dist export-ignore
 /pint.json export-ignore
-/laravel-ddd-package-prompt.md export-ignore

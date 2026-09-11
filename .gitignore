@@ -30,3 +30,6 @@ composer.lock
 # OS cruft
 .DS_Store
 Thumbs.db
+
+# Internal project notes — not for public distribution
+/laravel-ddd-package-prompt.md
