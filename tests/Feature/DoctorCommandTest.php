@@ -166,3 +166,253 @@ it('flags repositories that return Eloquent models instead of domain entities', 
             ]]
         );
 });
+
+it('flags Illuminate imports written with a leading backslash, as functions, or indented', function (): void {
+    $this->artisan('ddd:domain', ['name' => 'Contact'])->assertSuccessful();
+
+    $file = "{$this->domainsPath}/Contact/Domain/Entities/BadEntity.php";
+    File::ensureDirectoryExists(dirname($file));
+    File::put($file, <<<'PHP'
+        <?php
+
+        declare(strict_types=1);
+
+        namespace App\Domains\Contact\Domain\Entities {
+            use \Illuminate\Support\Facades\Cache;
+            use function Illuminate\Support\enum_value;
+
+            final class BadEntity
+            {
+            }
+        }
+
+        PHP);
+
+    $this->artisan('ddd:doctor')
+        ->assertFailed()
+        ->expectsTable(
+            ['File:Line', 'Rule violated'],
+            [
+                ['Contact/Domain/Entities/BadEntity.php:6', 'Domain layer must not import Illuminate/Eloquent classes.'],
+                ['Contact/Domain/Entities/BadEntity.php:7', 'Domain layer must not import Illuminate/Eloquent classes.'],
+            ]
+        );
+});
+
+it('flags App\Models and Infrastructure imports inside the Domain layer', function (): void {
+    $this->artisan('ddd:domain', ['name' => 'Contact'])->assertSuccessful();
+
+    $file = "{$this->domainsPath}/Contact/Domain/Entities/BadEntity.php";
+    File::ensureDirectoryExists(dirname($file));
+    File::put($file, <<<'PHP'
+        <?php
+
+        declare(strict_types=1);
+
+        namespace App\Domains\Contact\Domain\Entities;
+
+        use App\Models\User;
+        use App\Domains\Contact\Infrastructure\Persistence\Eloquent\LeadModel;
+
+        final class BadEntity
+        {
+        }
+
+        PHP);
+
+    $this->artisan('ddd:doctor')
+        ->assertFailed()
+        ->expectsTable(
+            ['File:Line', 'Rule violated'],
+            [
+                ['Contact/Domain/Entities/BadEntity.php:7', 'Domain layer must not import App\Models or Infrastructure classes.'],
+                ['Contact/Domain/Entities/BadEntity.php:8', 'Domain layer must not import App\Models or Infrastructure classes.'],
+            ]
+        );
+});
+
+it('flags fully-qualified Illuminate references inside the Domain layer', function (): void {
+    $this->artisan('ddd:domain', ['name' => 'Contact'])->assertSuccessful();
+
+    $file = "{$this->domainsPath}/Contact/Domain/Entities/BadEntity.php";
+    File::ensureDirectoryExists(dirname($file));
+    File::put($file, <<<'PHP'
+        <?php
+
+        declare(strict_types=1);
+
+        namespace App\Domains\Contact\Domain\Entities;
+
+        final class BadEntity extends \Illuminate\Database\Eloquent\Model
+        {
+            public function cached(): mixed
+            {
+                return \Illuminate\Support\Facades\Cache::get('key');
+            }
+        }
+
+        PHP);
+
+    $this->artisan('ddd:doctor')
+        ->assertFailed()
+        ->expectsTable(
+            ['File:Line', 'Rule violated'],
+            [
+                ['Contact/Domain/Entities/BadEntity.php:7', 'Domain layer must not reference Illuminate classes by fully-qualified name.'],
+                ['Contact/Domain/Entities/BadEntity.php:11', 'Domain layer must not reference Illuminate classes by fully-qualified name.'],
+            ]
+        );
+});
+
+it('flags root-namespace facade aliases inside the Domain layer', function (): void {
+    $this->artisan('ddd:domain', ['name' => 'Contact'])->assertSuccessful();
+
+    $file = "{$this->domainsPath}/Contact/Domain/Services/BadService.php";
+    File::ensureDirectoryExists(dirname($file));
+    File::put($file, <<<'PHP'
+        <?php
+
+        declare(strict_types=1);
+
+        namespace App\Domains\Contact\Domain\Services;
+
+        final class BadService
+        {
+            public function count(): int
+            {
+                return \DB::table('leads')->count();
+            }
+
+            public function slug(string $value): string
+            {
+                return \Str::slug($value);
+            }
+        }
+
+        PHP);
+
+    $this->artisan('ddd:doctor')
+        ->assertFailed()
+        ->expectsTable(
+            ['File:Line', 'Rule violated'],
+            [
+                ['Contact/Domain/Services/BadService.php:11', 'Domain layer must not use Laravel facade aliases.'],
+                ['Contact/Domain/Services/BadService.php:16', 'Domain layer must not use Laravel facade aliases.'],
+            ]
+        );
+});
+
+it('flags Laravel global helpers inside the Domain layer', function (): void {
+    $this->artisan('ddd:domain', ['name' => 'Contact'])->assertSuccessful();
+
+    $file = "{$this->domainsPath}/Contact/Domain/Services/BadService.php";
+    File::ensureDirectoryExists(dirname($file));
+    File::put($file, <<<'PHP'
+        <?php
+
+        declare(strict_types=1);
+
+        namespace App\Domains\Contact\Domain\Services;
+
+        final class BadService
+        {
+            public function handle(): void
+            {
+                $at = now();
+                $name = config('app.name');
+                $events = app('events');
+                event('lead.created');
+            }
+        }
+
+        PHP);
+
+    $this->artisan('ddd:doctor')
+        ->assertFailed()
+        ->expectsTable(
+            ['File:Line', 'Rule violated'],
+            [
+                ['Contact/Domain/Services/BadService.php:11', 'Domain layer must not call Laravel global helpers.'],
+                ['Contact/Domain/Services/BadService.php:12', 'Domain layer must not call Laravel global helpers.'],
+                ['Contact/Domain/Services/BadService.php:13', 'Domain layer must not call Laravel global helpers.'],
+                ['Contact/Domain/Services/BadService.php:14', 'Domain layer must not call Laravel global helpers.'],
+            ]
+        );
+});
+
+it('does not flag look-alikes of framework leaks in the Domain layer', function (): void {
+    $this->artisan('ddd:domain', ['name' => 'Contact'])->assertSuccessful();
+
+    $file = "{$this->domainsPath}/Contact/Domain/Services/CleanService.php";
+    File::ensureDirectoryExists(dirname($file));
+    File::put($file, <<<'PHP'
+        <?php
+
+        declare(strict_types=1);
+
+        namespace App\Domains\Contact\Domain\Services;
+
+        /**
+         * Mentions now(), config() and \Illuminate\Support\Collection only in a docblock.
+         */
+        final class CleanService
+        {
+            public function __construct(private readonly \Closure $app) {}
+
+            // A comment calling event('x') or \DB::table() is not code.
+            public function event(): string
+            {
+                return 'event';
+            }
+
+            public function now(): \DateTimeImmutable
+            {
+                return new \DateTimeImmutable();
+            }
+
+            public function handle(): void
+            {
+                $this->event();
+                self::config();
+                ($this->app)();
+                throw new \Exception('not a facade');
+            }
+
+            private static function config(): void {}
+        }
+
+        PHP);
+
+    $this->artisan('ddd:doctor')
+        ->assertSuccessful()
+        ->expectsOutputToContain('No violations found');
+});
+
+it('only applies framework leak checks to the Domain layer', function (): void {
+    $this->artisan('ddd:domain', ['name' => 'Contact'])->assertSuccessful();
+
+    $file = "{$this->domainsPath}/Contact/Infrastructure/Services/ClockService.php";
+    File::ensureDirectoryExists(dirname($file));
+    File::put($file, <<<'PHP'
+        <?php
+
+        declare(strict_types=1);
+
+        namespace App\Domains\Contact\Infrastructure\Services;
+
+        use App\Models\User;
+
+        final class ClockService
+        {
+            public function now(): mixed
+            {
+                return \DB::table('users')->where('created_at', '<', now())->count() + User::count();
+            }
+        }
+
+        PHP);
+
+    $this->artisan('ddd:doctor')
+        ->assertSuccessful()
+        ->expectsOutputToContain('No violations found');
+});
