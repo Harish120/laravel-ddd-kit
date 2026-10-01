@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- `ddd:doctor` now catches more ways a `Domain/` class couples itself to the
+  framework, not just a plain `use Illuminate\...` line: Illuminate imports
+  written with a leading backslash, as `use function`, or indented;
+  imports from `App\Models` or an `Infrastructure` namespace;
+  fully-qualified `\Illuminate\...` references; root-namespace facade
+  aliases like `\DB::`; and container-backed helpers like `now()`, `app()`,
+  `config()`, and `event()`. Comment lines are ignored by these checks.
+
 ## [0.1.0] - 2026-09-10
 
 ### Added

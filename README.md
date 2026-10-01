@@ -512,7 +512,19 @@ php artisan ddd:doctor
 
 It checks:
 
-- No `use Illuminate\...` imports anywhere under a domain's `Domain/` layer.
+- No framework coupling anywhere under a domain's `Domain/` layer:
+  - no `Illuminate\...` imports, including `use \Illuminate\...`,
+    `use function Illuminate\...`, and indented imports;
+  - no imports from `App\Models\...` or any `...\Infrastructure\...`
+    namespace (e.g. the domain's own Eloquent model);
+  - no fully-qualified `\Illuminate\...` references, such as
+    `extends \Illuminate\Database\Eloquent\Model`;
+  - no root-namespace facade aliases such as `\DB::` or `\Cache::`
+    (Laravel's defaults plus any in `config('app.aliases')`);
+  - no container-backed global helpers such as `now()`, `app()`,
+    `config()`, `event()`, or `collect()`. Pure utilities like `value()`
+    or `blank()` are allowed, and method calls like `$this->event()` are
+    not mistaken for helpers. Comment lines are ignored.
 - No public setters (`setX()`) or public properties on classes in
   `Domain/Entities/`.
 - Every class in `Application/UseCases/` contains a `DB::transaction(` call.
